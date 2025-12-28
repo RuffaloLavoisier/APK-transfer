@@ -2,6 +2,10 @@
 
 This project enables APK transfer from an Android device to a PC using only an Android app and a PC client, without requiring ADB, cable, or root access. It consists of two components: the APK-transfer-APP (Android application) and the APK-transfer-SERVER (PC server). The app extracts APK files and sends them to the server via HTTP.
 
+## DEMO
+
+![Image](https://github.com/user-attachments/assets/546907f4-cc90-4b3f-b71e-50c20d738438)
+
 ## Components
 - **APK-transfer-APP**: The Android application that runs on the device and handles the extraction and transfer of APK files.
 - **APK-transfer-SERVER**: The PC server that receives the APK files and provides a web interface for managing the transfers.
