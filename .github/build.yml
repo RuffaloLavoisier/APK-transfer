@@ -1,0 +1,84 @@
+name: Build Standalone Executable (Server)
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        if: runner.os != 'Windows'
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+          
+          cd APK-transfer-server
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        shell: bash
+
+      # Windows는 bash 대신 powershell이 기본이므로 분리
+      - name: Install dependencies (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+
+          cd APK-transfer-server
+          if (Test-Path requirements.txt) { pip install -r requirements.txt }
+        shell: powershell
+
+      - name: Build binary
+        if: runner.os != 'Windows'
+        run: |
+          cd APK-transfer-server
+          pyinstaller --clean --onefile main.py
+        shell: bash
+
+      - name: Build binary (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          cd APK-transfer-server
+          pyinstaller --clean --onefile main.py
+        shell: powershell
+
+      - name: Rename output
+        if: runner.os != 'Windows'
+        run: |
+          cd APK-transfer-server
+          mkdir -p release
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            mv dist/main release/main-linux-x64
+          elif [ "$RUNNER_OS" = "macOS" ]; then
+            mv dist/main release/main-macos
+          fi
+        shell: bash
+
+      - name: Rename output (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          cd APK-transfer-server
+          mkdir release
+          move dist\main.exe release\main-windows-x64.exe
+        shell: powershell
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: APK-transfer-server-${{ runner.os }}
+          path: APK-transfer-server/release/*
