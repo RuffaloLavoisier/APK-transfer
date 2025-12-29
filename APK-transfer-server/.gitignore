@@ -1,0 +1,8 @@
+uploads/
+
+build/
+dist/
+
+*.spec
+
+flask_any/
